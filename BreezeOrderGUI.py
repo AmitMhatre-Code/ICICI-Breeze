@@ -21,10 +21,15 @@ class BOrder(tk.Tk):
         frame_main = tk.Frame(self)
         frame_main.grid(sticky=tk.NSEW)
 
+        self.create_message_frame(frame_main)
+        self.creat_order_frame(frame_main)
+        self.create_order_widget()
+
+    def create_message_frame(self,frame):
         # # Setup the Messages frame with the Scrollbar
-        title = tk.Label(frame_main,text="MESSAGES",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+        title = tk.Label(frame,text="MESSAGES",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
         title.grid(row=0,column=0,sticky=tk.NSEW)
-        msg_out_frame = tk.Frame(frame_main)
+        msg_out_frame = tk.Frame(frame)
         msg_out_frame.grid(row=1, column=0, pady=(5, 0), sticky=tk.NW)
         msg_out_frame.grid_rowconfigure(0, weight=1)
         msg_out_frame.grid_columnconfigure(0, weight=1)        
@@ -42,15 +47,13 @@ class BOrder(tk.Tk):
 
         msg_out_frame.config(width=1200,height=100)
 
-        # # Setup the order frame
-        title = tk.Label(frame_main,text="PLACE ORDER",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+    def creat_order_frame(self,frame):
+        title = tk.Label(frame,text="PLACE ORDER",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
         title.grid(row=2,column=0,sticky=tk.NSEW)        
-        self.order_frame = tk.Frame(frame_main)
+        self.order_frame = tk.Frame(frame)
         self.order_frame.grid(row=3, column=0, pady=(5, 0), sticky=tk.NW)
         self.order_frame.grid_rowconfigure(0, weight=1)
         self.order_frame.grid_columnconfigure([0,1,2,3], weight=1, minsize=300)
-
-        self.create_order_widget()
 
     def display_message(self,text,type):
         frame = self.msg_frame
