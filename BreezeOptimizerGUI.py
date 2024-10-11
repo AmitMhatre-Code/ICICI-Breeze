@@ -19,13 +19,13 @@ class BOGUI(tk.Tk):
         self.grid_rowconfigure(0,weight=1)
         self.columnconfigure(0,weight=1)        
 
-        frame_main = tk.Frame(self)
-        frame_main.grid(sticky=tk.NSEW)
+        self.frame_main = tk.Frame(self)
+        self.frame_main.grid(sticky=tk.NSEW)
 
         # # Setup the Messages frame with the Scrollbar
-        title = tk.Label(frame_main,text="MESSAGES",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+        title = tk.Label(self.frame_main,text="MESSAGES",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
         title.grid(row=0,column=0,sticky=tk.NSEW)
-        msg_out_frame = tk.Frame(frame_main)
+        msg_out_frame = tk.Frame(self.frame_main)
         msg_out_frame.grid(row=1, column=0, pady=(5, 0), sticky=tk.NW)
         msg_out_frame.grid_rowconfigure(0, weight=1)
         msg_out_frame.grid_columnconfigure(0, weight=1)        
@@ -44,18 +44,18 @@ class BOGUI(tk.Tk):
         msg_out_frame.config(width=1200,height=100)
 
         # # Setup the input frame
-        title = tk.Label(frame_main,text="INPUT",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+        title = tk.Label(self.frame_main,text="INPUT",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
         title.grid(row=2,column=0,sticky=tk.NSEW)        
-        self.input_frame = tk.Frame(frame_main)
+        self.input_frame = tk.Frame(self.frame_main)
         self.input_frame.grid(row=3, column=0, pady=(5, 0), sticky=tk.NW)
         self.input_frame.grid_rowconfigure(0, weight=1)
         self.input_frame.grid_columnconfigure([0,1,2,3], weight=1, minsize=300)
         self.create_input_widget()
 
         # # Setup the optimisation option output frame
-        title = tk.Label(frame_main,text="OPTIMISED OPTIONS",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+        title = tk.Label(self.frame_main,text="OPTIMISED OPTIONS",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
         title.grid(row=4,column=0,sticky=tk.NSEW)
-        output_out_frame = tk.Frame(frame_main)
+        output_out_frame = tk.Frame(self.frame_main)
         output_out_frame.grid(row=5, column=0, pady=(5, 0), sticky=tk.NW)
         output_out_frame.grid_rowconfigure(0, weight=1)
         output_out_frame.grid_columnconfigure(0, weight=1)        
@@ -73,13 +73,15 @@ class BOGUI(tk.Tk):
 
         output_out_frame.config(width=1200,height=100)
 
+    def create_order_frame(self):    
         # # Setup the order frame
-        title = tk.Label(frame_main,text="CONFIRM ORDER",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+        title = tk.Label(self.frame_main,text="CONFIRM ORDER",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
         title.grid(row=6,column=0,sticky=tk.NSEW)        
-        self.order_frame = tk.Frame(frame_main)
-        self.order_frame.grid(row=7, column=0, pady=(5, 0), sticky=tk.NW)
-        self.order_frame.grid_rowconfigure(0, weight=1)
-        self.order_frame.grid_columnconfigure([0,1,2,3], weight=1, minsize=300)
+        order_frame = tk.Frame(self.frame_main)
+        order_frame.grid(row=7, column=0, pady=(5, 0), sticky=tk.NW)
+        order_frame.grid_rowconfigure(0, weight=1)
+        order_frame.grid_columnconfigure([0,1,2,3], weight=1, minsize=300)
+        return order_frame
 
     def display_message(self,text,type):
         frame = self.msg_frame
@@ -350,7 +352,7 @@ class BOGUI(tk.Tk):
     def confirm_order(self,i):
         order = i
 
-        frame = self.order_frame
+        frame = self.create_order_frame()
 
         stock_code = order['stock_code']
         self.ow_stock_code = tk.StringVar(value=stock_code)
@@ -406,8 +408,11 @@ class BOGUI(tk.Tk):
         ow_pe = tk.Entry(frame,textvariable=self.ow_price)
         ow_pe.grid(row=8,column=2,sticky=tk.W)
 
-        tk.Button(frame,text='Exit',height=2,command=self.quit).grid(row=9,column=1,sticky=tk.E)
+        tk.Button(frame,text='Exit',height=2,command=partial(self.destroy_order,frame)).grid(row=9,column=1,sticky=tk.E)
         tk.Button(frame,text='Order',height=2,command=self.fire_order).grid(row=9,column=2,sticky=tk.W)
+
+    def destroy_order(self,frame):
+        frame.destroy()
 
     def fire_order(self):
         order = {}
