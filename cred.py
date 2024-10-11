@@ -4,6 +4,7 @@ import json
 
 class cred():
 
+    PATH = "/Users/amitmhatre/Documents/BreezeCreds/"
     FILE = "credaparna"
 
     def __init__(self):
@@ -13,7 +14,7 @@ class cred():
         self.secret_key = None
         self.breeze = None
         # load credentials from JSON file
-        f = open ("./"+self.FILE+".json", "r")
+        f = open (self.PATH+self.FILE+".json", "r")
         data = f.read()
         json_data = json.loads(data)
         f.close()
@@ -40,7 +41,7 @@ class cred():
             json_data['session_token'] = session_token
             json_data['app_key'] = self.app_key
             json_data['secret_key'] = self.secret_key
-            f = open("./"+self.FILE+".json",'w')
+            f = open(self.PATH+self.FILE+".json",'w')
             print(json.dumps(json_data),file=f)   
             f.close()         
             return 200
