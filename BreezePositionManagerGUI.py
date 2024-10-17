@@ -34,6 +34,7 @@ class BManagerGUI(tk.Tk):
 
         # # Setup the input frame
         self.create_positions_frame()
+        self.populate_positions()
 
     def create_message_frame(self):
         title = tk.Label(self.frame_main,text="MESSAGES",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
@@ -79,9 +80,90 @@ class BManagerGUI(tk.Tk):
 
         position_out_frame.config(width=1200,height=100)
 
+        self.position_frame.grid_columnconfigure([0],weight=2,minsize=200)
+        self.position_frame.grid_columnconfigure([1,2,3,4,5,6,7,8],weight=1,minsize=110)
+        cl = tk.Label(self.position_frame,text='CONTRACT',background="gray13",relief=tk.GROOVE,anchor=tk.W)
+        cl.grid(row=0,column=0,sticky=tk.NSEW)
+        pl = tk.Label(self.position_frame,text='POSITION',background="gray13",relief=tk.GROOVE)
+        pl.grid(row=0,column=1,sticky=tk.NSEW)
+        ql = tk.Label(self.position_frame,text='QUANTITY',background="gray13",relief=tk.GROOVE,anchor=tk.E)
+        ql.grid(row=0,column=2,sticky=tk.NSEW)
+        apl = tk.Label(self.position_frame,text='PRICE',background="gray13",relief=tk.GROOVE,anchor=tk.E)
+        apl.grid(row=0,column=3,sticky=tk.NSEW)
+        lpl = tk.Label(self.position_frame,text='LTP',background="gray13",relief=tk.GROOVE,anchor=tk.E)
+        lpl.grid(row=0,column=4,sticky=tk.NSEW)
+        prl = tk.Label(self.position_frame,text='PROFIT',background="gray13",relief=tk.GROOVE,anchor=tk.E)
+        prl.grid(row=0,column=5,sticky=tk.NSEW)
+        cal = tk.Label(self.position_frame,text='CARRY',background="gray13",relief=tk.GROOVE,anchor=tk.E)
+        cal.grid(row=0,column=6,sticky=tk.NSEW)
+
+        self.position_frame.update_idletasks()
+        self.position_canvas.config(scrollregion=self.position_canvas.bbox(tk.ALL))
+
+    def populate_positions(self):
+        frame = self.position_frame
+        canvas = self.position_canvas
         positions = optimizer.get_positions()
+        row = 1
+
+        if positions['Status'] == 200:
+            for i in positions['Success']:
+                contract = i['stock_code']+"-"+i['expiry_date']+"-"+i['strike_price']+"-"+i['right']
+                cl = tk.Label(frame,text=contract)
+                cl.grid(row=row,column=0,sticky=tk.W)
+
+                pl = tk.Label(frame,text=i['action'])
+                pl.grid(row=row,column=1,sticky=tk.NSEW)
+
+                quantity = int(i['quantity'])
+                quantity = f'{quantity:,.0f}'
+                ql = tk.Label(frame,text=quantity)
+                ql.grid(row=row,column=2,sticky=tk.E)
+
+                avg_price = float(i['average_price'])
+                if avg_price >= 0:
+                    avg_price = f'₹{avg_price:,.2f}'
+                    apl = tk.Label(frame,text=avg_price,foreground="green")
+                else:
+                    avg_price = f'(₹{avg_price:,.2f})'
+                    apl = tk.Label(frame,text=avg_price,foreground="red")                                        
+                apl.grid(row=row,column=3,sticky=tk.E)
+
+                ltp_price = float(i['ltp'])
+                if ltp_price >= 0:
+                    ltp_price = f'₹{ltp_price:,.2f}'
+                    lpl = tk.Label(frame,text=ltp_price,foreground="green")
+                else:
+                    ltp_price = f'(₹{ltp_price:,.2f})'
+                    lpl = tk.Label(frame,text=ltp_price,foreground="red")                    
+                lpl.grid(row=row,column=4,sticky=tk.E)
+
+                current_profit = float(i['current_profit'])
+                if current_profit >= 0:
+                    current_profit = f'₹{current_profit:,.0f}'
+                    prl = tk.Label(frame,text=current_profit,foreground="green")
+                else:
+                    current_profit = f'(₹{current_profit:,.0f})'
+                    prl = tk.Label(frame,text=current_profit,foreground="red")
+                prl.grid(row=row,column=5,sticky=tk.E)
+
+                carry_profit = float(i['carry_profit'])
+                if carry_profit >= 0:
+                    carry_profit = f'₹{carry_profit:,.0f}'                  
+                    cal = tk.Label(frame,text=carry_profit,foreground="green")
+                else:
+                    carry_profit = f'(₹{carry_profit:,.0f})'                  
+                    cal = tk.Label(frame,text=carry_profit,foreground="red")                    
+                cal.grid(row=row,column=6,sticky=tk.E)
+
+                tk.Button(frame,text='Hedge',height=2,command=self.quit).grid(row=row,column=7,sticky=tk.NSEW)
+                tk.Button(frame,text='Square Off',height=2,command=self.quit).grid(row=row,column=8,sticky=tk.NSEW)
+
+                row +=1
         # print("Showing positions below")
         # print(json.dumps(positions,indent=4))
+        frame.update_idletasks()
+        canvas.config(scrollregion=canvas.bbox(tk.ALL))
 
     def establish_session(self):
         frame = self.frame_main
@@ -106,13 +188,6 @@ class BManagerGUI(tk.Tk):
         else:
             message = "Breeze Session Successfully Connected @"+str(datetime.datetime.today())+" : Please RESTART application"
             self.display_message(message,self.SUCCESS)            
-
-    def populate_positions(self):
-        frame = self.position_frame
-        canvas = self.position_canvas
-        
-        frame.update_idletasks()
-        canvas.config(scrollregion=canvas.bbox(tk.ALL))        
 
     def create_input_frame(self):
         # frame = self.input_frame

@@ -143,14 +143,21 @@ class optimizer():
 
     def get_positions():
         breeze = optimizer.get_session()
-        # token = optimizer.get_session_token()
-        # response = breeze.get_customer_details(api_session="48253543")
-        # response = breeze.get_portfolio_positions()
-        # response = breeze.get_quotes(stock_code="CNXBAN",exchange_code="NFO",expiry_date="2024-10-23T06:00:00.000Z",product_type="options",right="CALL",strike_price="62000")
-        response = breeze.get_data_from_stock_token_value(input_stock_token="4.1!53293")
-        response = breeze.
-        print(json.dumps(response,indent=4))
-        return response
+        positions = breeze.get_portfolio_positions()
+        if positions['Status'] == 200:
+            for i in positions['Success']:
+                if i['action'] == "Sell":
+                    i['current_profit'] = (float(i['average_price']) - float(i['ltp'])) * int(i['quantity'])
+                    i['carry_profit'] = float(i['ltp']) * int(i['quantity'])
+                else:
+                    i['current_profit'] = (float(i['ltp']) - float(i['average_price'])) * int(i['quantity'])
+                    i['carry_profit'] = - float(i['ltp']) * int(i['quantity'])
+        else:
+            positions['Error'] = positions['Error']
+            positions['Status'] = positions['Status']            
+
+        print(json.dumps(positions,indent=4))
+        return positions
 
     def hedge_options(right,stock_code,lot_size,quantity,expiry_date,strike_price,top):
         exchange_code = "NFO"
