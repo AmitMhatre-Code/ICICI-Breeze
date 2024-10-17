@@ -1,10 +1,15 @@
 import tkinter as tk
 import datetime
 import json
-from optimizer import optimizer
+from optimizerv2 import optimizer
 from functools import partial
 
-class BOGUI(tk.Tk):
+# import breeze_connect.config as temp
+
+# temp.SECURITY_MASTER_URL
+
+
+class BManagerGUI(tk.Tk):
 
     ERROR = "Error"
     SUCCESS = "Success"
@@ -15,7 +20,7 @@ class BOGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.option_add("*Font","Courier")
-        self.title("Breeze Options Optimizer")
+        self.title("Breeze Positions Manager")
         self.grid_rowconfigure(0,weight=1)
         self.columnconfigure(0,weight=1)        
 
@@ -24,8 +29,11 @@ class BOGUI(tk.Tk):
 
         # # Setup the Messages frame with the Scrollbar
         self.create_message_frame()
+
+        self.establish_session()
+
         # # Setup the input frame
-        self.create_input_frame()
+        self.create_positions_frame()
 
     def create_message_frame(self):
         title = tk.Label(self.frame_main,text="MESSAGES",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
@@ -47,6 +55,64 @@ class BOGUI(tk.Tk):
         self.msg_canvas.create_window((0,0), window=self.msg_frame, anchor=tk.SE)
 
         msg_out_frame.config(width=1200,height=100)        
+
+    def create_positions_frame(self):
+        self.iw_session_token = tk.StringVar()
+
+        title = tk.Label(self.frame_main,text="POSITIONS",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+        title.grid(row=2,column=0,sticky=tk.NSEW)
+        position_out_frame = tk.Frame(self.frame_main)
+        position_out_frame.grid(row=3, column=0, pady=(5, 0), sticky=tk.NW)
+        position_out_frame.grid_rowconfigure(0, weight=1)
+        position_out_frame.grid_columnconfigure(0, weight=1)        
+        position_out_frame.grid_propagate(False)
+        
+        self.position_canvas = tk.Canvas(position_out_frame)
+        self.position_canvas.grid(row=0, column=0, sticky=tk.NSEW)
+        
+        position_vsb = tk.Scrollbar(position_out_frame, orient=tk.VERTICAL, command=self.position_canvas.yview)
+        position_vsb.grid(row=0, column=1, sticky=tk.NS)
+        self.position_canvas.configure(yscrollcommand=position_vsb.set)
+
+        self.position_frame = tk.Frame(self.position_canvas)
+        self.position_canvas.create_window((0,0), window=self.position_frame, anchor=tk.SE)
+
+        position_out_frame.config(width=1200,height=100)
+
+        positions = optimizer.get_positions()
+        # print("Showing positions below")
+        # print(json.dumps(positions,indent=4))
+
+    def establish_session(self):
+        frame = self.frame_main
+        if optimizer.check_session() == 200:
+            message = "Breeze Session Established"
+            self.display_message(message,self.SUCCESS)
+        else:
+            message = "Breeze Session Failed. Get fresh token from https://api.icicidirect.com/apiuser/home"
+            self.display_message(message,self.ERROR)
+
+            iw_el = tk.Label(frame,text='Breeze Session Token')
+            iw_el.grid(row=0,sticky=tk.E,columnspan=2)
+            iw_ee = tk.Entry(frame,textvariable=self.iw_session_token)
+            iw_ee.grid(row=0,column=2,sticky=tk.W)
+            tk.Button(frame,text='Exit',height=2,command=self.quit).grid(row=9,column=1,sticky=tk.E)
+            tk.Button(frame,text='Submit',height=2,command=self.input_submit).grid(row=9,column=2,sticky=tk.W)    
+
+    def submit_token(self):
+        if optimizer.reinitiate_session(self.iw_session_token.get()) != 200:
+            message = "Breeze Initiation Failed @"+str(datetime.datetime.today())
+            self.display_message(message,self.ERROR)                
+        else:
+            message = "Breeze Session Successfully Connected @"+str(datetime.datetime.today())+" : Please RESTART application"
+            self.display_message(message,self.SUCCESS)            
+
+    def populate_positions(self):
+        frame = self.position_frame
+        canvas = self.position_canvas
+        
+        frame.update_idletasks()
+        canvas.config(scrollregion=canvas.bbox(tk.ALL))        
 
     def create_input_frame(self):
         # frame = self.input_frame
@@ -227,7 +293,7 @@ class BOGUI(tk.Tk):
                 error = True
 
             try:
-                if datetime.date.fromisoformat(parms['expiry_date']) < datetime.date.today():
+                if datetime.date.fromisoformat(parms['expiry_date']) <= datetime.date.today():
                     message = "Provide today or future date"
                     self.display_message(message,self.ERROR)
                     error = True                    
@@ -536,5 +602,5 @@ class BOGUI(tk.Tk):
         canvas.config(scrollregion=canvas.bbox(tk.ALL))
 
 if __name__ == "__main__":
-    window = BOGUI()
+    window = BManagerGUI()
     window.mainloop()
