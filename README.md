@@ -4,15 +4,16 @@
 4. Run the BreezeOrderGUI separately if you want to fire different orders
 
 
+CHANGE BACKLOG
 Important:
-Show Bid:Ask spread when placing order so user can decide whether price likely to move up or down
-Group positions by Expiry Date & Stock Code and calculate hedging / risk at these group levels
-Post Breeze Session connection, use application without having to restart it
-Catch all breeze exceptions
+1. Show Bid:Ask spread when placing order so user can decide whether price likely to move up or down
+2. Group positions by Expiry Date & Stock Code and calculate hedging / risk at these group levels
+3. Post Breeze Session connection, use application without having to restart it
+4. Catch all breeze exceptions
 
 Nice to have:
-Point breeze config file to local directories for securities master files as long as we don't use them
-If ICICI Direct is down, import of Cred fails. Move the session initiation out of __init__ in cred.py
-Parameterise Lot Sizes and Max Order Sizes via an external config file
-Allow clickable link to Breeze API login on the screen if session connection fails due to invalid token
-Restructure code: too much of logic sitting in GUI scripts.
+1. Point breeze config file to local directories for securities master files as long as we don't use them
+2. If ICICI Direct is down, import of Cred fails. Move the session initiation out of __init__ in cred.py
+3. Parameterise Lot Sizes and Max Order Sizes via an external config file
+4. Allow clickable link to Breeze API login on the screen if session connection fails due to invalid token
+5. Restructure code: too much of logic sitting in GUI scripts.
