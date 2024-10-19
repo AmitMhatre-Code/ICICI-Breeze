@@ -30,11 +30,11 @@ class BManagerGUI(tk.Tk):
         # # Setup the Messages frame with the Scrollbar
         self.create_message_frame()
 
-        self.establish_session()
+        session_status = self.establish_session()
 
-        # # Setup the input frame
-        self.create_positions_frame()
-        self.populate_positions()
+        if session_status == True:
+            self.create_positions_frame()
+            self.populate_positions()
 
     def create_message_frame(self):
         title = tk.Label(self.frame_main,text="MESSAGES",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
@@ -83,25 +83,34 @@ class BManagerGUI(tk.Tk):
         self.position_frame.grid_columnconfigure([0],weight=2,minsize=200)
         self.position_frame.grid_columnconfigure([1,2,3,4,5,6,7,8],weight=1,minsize=110)
         cl = tk.Label(self.position_frame,text='CONTRACT',background="gray13",relief=tk.GROOVE,anchor=tk.W)
-        cl.grid(row=0,column=0,sticky=tk.NSEW)
+        cl.grid(row=0,column=0,sticky=tk.NSEW,padx=(2,2))
         pl = tk.Label(self.position_frame,text='POSITION',background="gray13",relief=tk.GROOVE)
-        pl.grid(row=0,column=1,sticky=tk.NSEW)
+        pl.grid(row=0,column=1,sticky=tk.NSEW,padx=(2,2))
         ql = tk.Label(self.position_frame,text='QUANTITY',background="gray13",relief=tk.GROOVE,anchor=tk.E)
-        ql.grid(row=0,column=2,sticky=tk.NSEW)
+        ql.grid(row=0,column=2,sticky=tk.NSEW,padx=(2,2))
         apl = tk.Label(self.position_frame,text='PRICE',background="gray13",relief=tk.GROOVE,anchor=tk.E)
-        apl.grid(row=0,column=3,sticky=tk.NSEW)
+        apl.grid(row=0,column=3,sticky=tk.NSEW,padx=(2,2))
         lpl = tk.Label(self.position_frame,text='LTP',background="gray13",relief=tk.GROOVE,anchor=tk.E)
-        lpl.grid(row=0,column=4,sticky=tk.NSEW)
+        lpl.grid(row=0,column=4,sticky=tk.NSEW,padx=(2,2))
         prl = tk.Label(self.position_frame,text='PROFIT',background="gray13",relief=tk.GROOVE,anchor=tk.E)
-        prl.grid(row=0,column=5,sticky=tk.NSEW)
+        prl.grid(row=0,column=5,sticky=tk.NSEW,padx=(2,2))
         cal = tk.Label(self.position_frame,text='CARRY',background="gray13",relief=tk.GROOVE,anchor=tk.E)
-        cal.grid(row=0,column=6,sticky=tk.NSEW)
+        cal.grid(row=0,column=6,sticky=tk.NSEW,padx=(2,2))
 
         self.position_frame.update_idletasks()
         self.position_canvas.config(scrollregion=self.position_canvas.bbox(tk.ALL))
 
+    def create_session_frame(self):
+        title = tk.Label(self.frame_main,text="INPUT",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+        title.grid(row=2,column=0,sticky=tk.NSEW)        
+        self.session_frame = tk.Frame(self.frame_main)
+        self.session_frame.grid(row=3, column=0, pady=(5, 0), sticky=tk.NW)
+        self.session_frame.grid_rowconfigure(0, weight=1)
+        self.session_frame.grid_columnconfigure([0,1,2,3], weight=1, minsize=300)        
+
     def populate_positions(self):
         frame = self.position_frame
+        # frame.configure(padx=5,pady=5)
         canvas = self.position_canvas
         positions = optimizer.get_positions()
         row = 1
@@ -123,7 +132,7 @@ class BManagerGUI(tk.Tk):
                 avg_price = float(i['average_price'])
                 if avg_price >= 0:
                     avg_price = f'₹{avg_price:,.2f}'
-                    apl = tk.Label(frame,text=avg_price,foreground="green")
+                    apl = tk.Label(frame,text=avg_price,foreground="green3")
                 else:
                     avg_price = f'(₹{avg_price:,.2f})'
                     apl = tk.Label(frame,text=avg_price,foreground="red")                                        
@@ -132,7 +141,7 @@ class BManagerGUI(tk.Tk):
                 ltp_price = float(i['ltp'])
                 if ltp_price >= 0:
                     ltp_price = f'₹{ltp_price:,.2f}'
-                    lpl = tk.Label(frame,text=ltp_price,foreground="green")
+                    lpl = tk.Label(frame,text=ltp_price,foreground="green3")
                 else:
                     ltp_price = f'(₹{ltp_price:,.2f})'
                     lpl = tk.Label(frame,text=ltp_price,foreground="red")                    
@@ -141,7 +150,7 @@ class BManagerGUI(tk.Tk):
                 current_profit = float(i['current_profit'])
                 if current_profit >= 0:
                     current_profit = f'₹{current_profit:,.0f}'
-                    prl = tk.Label(frame,text=current_profit,foreground="green")
+                    prl = tk.Label(frame,text=current_profit,foreground="green3")
                 else:
                     current_profit = f'(₹{current_profit:,.0f})'
                     prl = tk.Label(frame,text=current_profit,foreground="red")
@@ -150,14 +159,14 @@ class BManagerGUI(tk.Tk):
                 carry_profit = float(i['carry_profit'])
                 if carry_profit >= 0:
                     carry_profit = f'₹{carry_profit:,.0f}'                  
-                    cal = tk.Label(frame,text=carry_profit,foreground="green")
+                    cal = tk.Label(frame,text=carry_profit,foreground="green3")
                 else:
                     carry_profit = f'(₹{carry_profit:,.0f})'                  
                     cal = tk.Label(frame,text=carry_profit,foreground="red")                    
                 cal.grid(row=row,column=6,sticky=tk.E)
 
-                tk.Button(frame,text='Hedge',height=2,command=self.quit).grid(row=row,column=7,sticky=tk.NSEW)
-                tk.Button(frame,text='Square Off',height=2,command=self.quit).grid(row=row,column=8,sticky=tk.NSEW)
+                tk.Button(frame,text='Hedge',height=2,command=partial(self.get_hedges,i)).grid(row=row,column=7,sticky=tk.NSEW,padx=(2,2))
+                tk.Button(frame,text='Square Off',height=2,command=partial(self.confirm_squareoff,i)).grid(row=row,column=8,sticky=tk.NSEW,padx=(2,2))
 
                 row +=1
         # print("Showing positions below")
@@ -165,21 +174,36 @@ class BManagerGUI(tk.Tk):
         frame.update_idletasks()
         canvas.config(scrollregion=canvas.bbox(tk.ALL))
 
+    def get_hedges(self,i):
+        right = i['right']
+        stock_code = i['stock_code']
+        lot_size = 15
+        quantity = i['quantity']
+        expiry_date = i['expiry_date']
+        strike_price = i['strike_price']
+        top = 3
+
+        hedges = optimizer.hedge_options(right,stock_code,lot_size,quantity,expiry_date,strike_price,top)
+        print(json.dumps(hedges,indent=4))
+
     def establish_session(self):
-        frame = self.frame_main
         if optimizer.check_session() == 200:
             message = "Breeze Session Established"
             self.display_message(message,self.SUCCESS)
+            return True
         else:
+            self.create_session_frame()
+            frame = self.session_frame
             message = "Breeze Session Failed. Get fresh token from https://api.icicidirect.com/apiuser/home"
             self.display_message(message,self.ERROR)
-
+            self.iw_session_token = tk.StringVar()
             iw_el = tk.Label(frame,text='Breeze Session Token')
             iw_el.grid(row=0,sticky=tk.E,columnspan=2)
             iw_ee = tk.Entry(frame,textvariable=self.iw_session_token)
             iw_ee.grid(row=0,column=2,sticky=tk.W)
             tk.Button(frame,text='Exit',height=2,command=self.quit).grid(row=9,column=1,sticky=tk.E)
-            tk.Button(frame,text='Submit',height=2,command=self.input_submit).grid(row=9,column=2,sticky=tk.W)    
+            tk.Button(frame,text='Submit',height=2,command=self.submit_token).grid(row=9,column=2,sticky=tk.W)
+            return False
 
     def submit_token(self):
         if optimizer.reinitiate_session(self.iw_session_token.get()) != 200:
@@ -516,7 +540,7 @@ class BManagerGUI(tk.Tk):
         self.order_frame_title.destroy()
         self.order_frame.destroy()
 
-    def confirm_order(self,i):
+    def confirm_squareoff(self,i):
         order = i
 
         self.create_order_frame()
@@ -542,14 +566,18 @@ class BManagerGUI(tk.Tk):
         ow_ede = tk.Entry(self.order_frame,textvariable=self.ow_expiry_date,state='readonly',readonlybackground="dark gray")
         ow_ede.grid(row=3,column=2,sticky=tk.W)
 
-        option = order['option']
+        option = order['right']
         self.ow_option = tk.StringVar(value=option)
         ow_ol = tk.Label(self.order_frame,text='Option')
         ow_ol.grid(row=4,sticky=tk.E,columnspan=2)
         ow_oe = tk.Entry(self.order_frame,textvariable=self.ow_option,state='readonly',readonlybackground="dark gray")
         ow_oe.grid(row=4,column=2,sticky=tk.W)
 
-        self.ow_action = tk.StringVar(value='SELL')
+        if order['action'] == 'Sell':
+            action = 'Buy'
+        else:
+            action = 'Sell'
+        self.ow_action = tk.StringVar(value=action)
         ow_al = tk.Label(self.order_frame,text='Action')
         ow_al.grid(row=5,sticky=tk.E,columnspan=2)
         ow_ae = tk.Entry(self.order_frame,textvariable=self.ow_action,state='readonly',readonlybackground="dark gray")
@@ -568,8 +596,8 @@ class BManagerGUI(tk.Tk):
         ow_ote = tk.Entry(self.order_frame,textvariable=self.ow_order_tranche)
         ow_ote.grid(row=7,column=2,sticky=tk.W)
 
-        price = order['best_bid_price']
-        self.ow_price = tk.StringVar(value=price)
+        # price = order['ltp']
+        self.ow_price = tk.StringVar(value='')
         ow_pl = tk.Label(self.order_frame,text='Price')
         ow_pl.grid(row=8,sticky=tk.E,columnspan=2)
         ow_pe = tk.Entry(self.order_frame,textvariable=self.ow_price)

@@ -174,30 +174,57 @@ class optimizer():
             # Find the premium of ATM option by weeding out ITM options and illiquid options
             options = [{}] #unable to use sort function unless this is a list of dicts!            
             for i in options_chain['Success']:
-                if int(i['total_sell_qty']) > 0 and int(i['strike_price']) < strike_price and int(i['strike_price']) > int(i['spot_price']):
-                    i['spot_distance'] = int(i['strike_price']) - int(i['spot_price'])
+                if int(i['total_sell_qty']) > 0 and int(i['strike_price']) <= int(strike_price) and int(i['strike_price']) > round(float(i['spot_price'])):
+                    i['spot_distance'] = int(i['strike_price']) - round(float(i['spot_price']))
                     temp = {}
                     temp['strike_price'] = int(i['strike_price'])
                     temp['best_offer_price'] = i['best_offer_price']                    
                     temp['spot_distance'] = i['spot_distance']
-                    temp['strike_distance'] = strike_price - int(i['strike_price'])
+                    temp['strike_distance'] = int(strike_price) - int(i['strike_price'])
                     options.append(copy.deepcopy(temp))
             options.pop(0)
-            options = sorted(options, key=lambda x: x['spot_distance'], reverse=False)
-            atm_strike = options[0]['strike_price']
-            atm_premium = options[0]['best_offer_price']
+            options = sorted(options, key=lambda x: x['spot_distance'], reverse=True)
+            atm_index = len(options) - 1
+            atm_strike = options[atm_index]['strike_price']
+            atm_premium = options[atm_index]['best_offer_price']
+            print("atm_strike : ",atm_strike)
+            print("atm_premium : ",atm_premium)
 
-            # Build an array of what is the premium ratio at various distances from the spot
+            # Build an array of the premium ratio at various distances from the spot
             for i in options:
                 i['premium_ratio'] = i['best_offer_price'] / atm_premium
-
+            
+            # print(json.dumps(options,indent=4))
             for i in options:
+                index = 0
+                prev_distance = abs(options[0]['spot_distance'] - options[0]['strike_distance']) # this is the theoretically the largest difference that can exist for all the options between ATM Strike and Position Strike
+                # Difference between spot distance (at top of i array) & strike distance (for current j array) will keep reducing as we go through j array. The moment it starts increasing again is where the spot distance of j array is closest to strike distance of i array and has the premium ratio we can use. And we can break out of the j array at that point
                 for j in options:
-                    if i['strike_distance'] == j['spot_distance']:
-                        hedge_qty = quantity * j['premium_ratio']
+                    distance = abs(j['spot_distance'] - i['strike_distance'])
+                    # if i['strike_price'] == 61000:
+                    #     print("index : ",index)
+                    #     print("i strike : ",i['strike_price'])
+                    #     print("i strike_distance : ",i['strike_distance'])
+                    #     print("i spot_distance : ",i['spot_distance'])
+                    #     print("j strike : ",j['strike_price'])
+                    #     print("j strike_distance : ",j['strike_distance'])
+                    #     print("j spot_distance : ",j['spot_distance'])
+                    #     print("prev_distance : ",prev_distance)
+                    #     print("distance : ",distance)
+                    if distance > prev_distance:
+                        # print("Picking up strike price : ", options[index-1]['strike_price'])
+                        # print("Picking up premium ratio : ", options[index-1]['premium_ratio'])                        
+                        hedge_qty = float(quantity) * options[index-1]['premium_ratio']
                         i['hedge_qty'] = math.ceil(hedge_qty/lot_size) * lot_size
                         i['hedge_premium'] = i['hedge_qty'] * i['best_offer_price']
-                        break # better option than using WHILE loop because theoretically we may have options at a strike distance that don't match with any spot distance in case any of the intermediate options are illiquid
+                        # print("Calculated hedge_qty : ",i['hedge_qty'])
+                        # print("Calculated hedge_premium : ",i['hedge_premium'])
+                        break
+                    else:
+                        prev_distance = distance
+                    index +=1                   
+
+            print(json.dumps(options,indent=4))
             options = sorted(options, key=lambda x: x['hedge_premium'], reverse=False)
             sorted_hedges['Success'] = options[:top]
             sorted_hedges['Status'] = 200
