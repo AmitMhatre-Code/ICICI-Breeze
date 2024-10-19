@@ -106,7 +106,7 @@ else
         # Download the repository as a ZIP file
         echo "Downloading repository from $ZIP_URL to $PROJ_DIRECTORY_PATH..."
         if command -v curl &> /dev/null; then
-            curl -L -o "$PROJ_DIRECTORY_PATH/temp.zip" "https://github.com/AmitMhatre-Code/ICICI-Breeze/archive/refs/tags/v1.0.zip"
+            curl -L -o "$PROJ_DIRECTORY_PATH/repo.zip" "$ZIP_URL"
             # curl -L -O "$PROJ_DIRECTORY_PATH/repo.zip" "$ZIP_URL"            
         else
             wget -O "$PROJ_DIRECTORY_PATH/repo.zip" "$ZIP_URL"
