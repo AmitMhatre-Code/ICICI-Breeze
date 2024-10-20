@@ -16,6 +16,8 @@ class BManagerGUI(tk.Tk):
     WARNING = "Warning"
     INFO = "Info"
     TITLE = ["TkDefaultFont",15]
+    FRESH_ORDER = "Fresh"
+    SQOFF_ORDER = "Sqoff"
 
     def __init__(self):
         super().__init__()
@@ -165,8 +167,9 @@ class BManagerGUI(tk.Tk):
                     cal = tk.Label(frame,text=carry_profit,foreground="red")                    
                 cal.grid(row=row,column=6,sticky=tk.E)
 
-                tk.Button(frame,text='Hedge',height=2,command=partial(self.get_hedges,i)).grid(row=row,column=7,sticky=tk.NSEW,padx=(2,2))
-                tk.Button(frame,text='Square Off',height=2,command=partial(self.confirm_squareoff,i)).grid(row=row,column=8,sticky=tk.NSEW,padx=(2,2))
+                if i['action'] == "Sell":
+                    tk.Button(frame,text='Hedge',height=2,command=partial(self.get_hedges,i)).grid(row=row,column=7,sticky=tk.NSEW,padx=(2,2))
+                tk.Button(frame,text='Square Off',height=2,command=partial(self.confirm_order,i,self.SQOFF_ORDER)).grid(row=row,column=8,sticky=tk.NSEW,padx=(2,2))
 
                 row +=1
         # print("Showing positions below")
@@ -185,6 +188,8 @@ class BManagerGUI(tk.Tk):
 
         hedges = optimizer.hedge_options(right,stock_code,lot_size,quantity,expiry_date,strike_price,top)
         print(json.dumps(hedges,indent=4))
+        self.create_options_frame()
+        self.display_hedges(hedges)
 
     def establish_session(self):
         if optimizer.check_session() == 200:
@@ -434,14 +439,14 @@ class BManagerGUI(tk.Tk):
                 self.create_output_frame()                
                 self.display_options(response)
 
-    def create_output_frame(self):
+    def create_options_frame(self):
         # # Setup the optimisation option output frame
         try:
             self.output_out_frame_title.destroy()
-            self.output_out_frame_title = tk.Label(self.frame_main,text="OPTIMISED OPTIONS",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+            self.output_out_frame_title = tk.Label(self.frame_main,text="HEDGE OPTIONS",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
             self.output_out_frame_title.grid(row=4,column=0,sticky=tk.NSEW)
         except:
-            self.output_out_frame_title = tk.Label(self.frame_main,text="OPTIMISED OPTIONS",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
+            self.output_out_frame_title = tk.Label(self.frame_main,text="HEDGE OPTIONS",background="dark turquoise",foreground="black",borderwidth=2,relief=tk.GROOVE,font=self.TITLE)
             self.output_out_frame_title.grid(row=4,column=0,sticky=tk.NSEW)
         
         try:
@@ -479,13 +484,26 @@ class BManagerGUI(tk.Tk):
         except:
             None
 
-    def display_options(self,data):
+    def display_hedges(self,data):
         frame = self.output_frame
         canvas = self.output_canvas
 
-        # clear previous entries
-        # for widget in frame.winfo_children():
-        #     widget.destroy()
+        selected_option = tk.StringVar(value=' ')
+        if data['Status'] == 200:
+            for i in data['Success']:
+                premium = i['hedge_premium']
+                premium = f'₹{int(premium):,.0f}'
+                option = i['stock_code']+"-"+i['expiry_date']+"-"+str(i['strike_price'])+"-"+i['right']+" | Qty = "+str(i['hedge_qty'])+" | Premium = "+str(premium)+"        "
+                print(option)
+                button = tk.Radiobutton(frame,height=1,text=option,justify=tk.LEFT,variable=selected_option,value=i,command=partial(self.confirm_order,i,self.FRESH_ORDER))
+                button.grid(row=len(frame.grid_slaves()),sticky=tk.NW)
+
+        frame.update_idletasks()
+        canvas.config(scrollregion=canvas.bbox(tk.ALL))
+
+    def display_options(self,data):
+        frame = self.output_frame
+        canvas = self.output_canvas
 
         selected_option = tk.StringVar(value=' ')
         if data['ce_options']['Status'] == 200:
@@ -540,7 +558,7 @@ class BManagerGUI(tk.Tk):
         self.order_frame_title.destroy()
         self.order_frame.destroy()
 
-    def confirm_squareoff(self,i):
+    def confirm_order(self,i,intent):
         order = i
 
         self.create_order_frame()
@@ -573,10 +591,13 @@ class BManagerGUI(tk.Tk):
         ow_oe = tk.Entry(self.order_frame,textvariable=self.ow_option,state='readonly',readonlybackground="dark gray")
         ow_oe.grid(row=4,column=2,sticky=tk.W)
 
-        if order['action'] == 'Sell':
-            action = 'Buy'
-        else:
-            action = 'Sell'
+        if intent == self.SQOFF_ORDER:
+            if order['action'] == 'Sell':
+                action = 'Buy'
+            else:
+                action = 'Sell'
+        elif intent == self.FRESH_ORDER:
+            action = order['action']
         self.ow_action = tk.StringVar(value=action)
         ow_al = tk.Label(self.order_frame,text='Action')
         ow_al.grid(row=5,sticky=tk.E,columnspan=2)

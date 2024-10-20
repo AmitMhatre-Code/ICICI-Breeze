@@ -177,6 +177,10 @@ class optimizer():
                 if int(i['total_sell_qty']) > 0 and int(i['strike_price']) <= int(strike_price) and int(i['strike_price']) > round(float(i['spot_price'])):
                     i['spot_distance'] = int(i['strike_price']) - round(float(i['spot_price']))
                     temp = {}
+                    temp['stock_code'] = i['stock_code']
+                    temp['expiry_date'] = i['expiry_date']
+                    temp['right'] = i['right']
+                    temp['action'] = "Buy"
                     temp['strike_price'] = int(i['strike_price'])
                     temp['best_offer_price'] = i['best_offer_price']                    
                     temp['spot_distance'] = i['spot_distance']

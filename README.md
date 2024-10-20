@@ -19,3 +19,4 @@ Nice to have:
 3. Parameterise Lot Sizes and Max Order Sizes via an external config file
 4. Allow clickable link to Breeze API login on the screen if session connection fails due to invalid token
 5. Restructure code: too much of logic sitting in GUI scripts.
+6. Convert hard coded strings to constants
