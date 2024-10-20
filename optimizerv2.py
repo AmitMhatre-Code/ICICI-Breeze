@@ -186,7 +186,7 @@ class optimizer():
                     temp['spot_distance'] = i['spot_distance']
                     temp['strike_distance'] = int(strike_price) - int(i['strike_price'])
                     options.append(copy.deepcopy(temp))
-            options.pop(0)
+            options.pop(0) # to remove the first empty entry was was necessary to declare options as an array of dicts
             options = sorted(options, key=lambda x: x['spot_distance'], reverse=True)
             atm_index = len(options) - 1
             atm_strike = options[atm_index]['strike_price']
@@ -229,6 +229,7 @@ class optimizer():
                     index +=1                   
 
             print(json.dumps(options,indent=4))
+            options.pop(0) #remove the option that represents the very position we want to hedge because the above would have calculated the hedge_premium for all options except the very option we are hedging for
             options = sorted(options, key=lambda x: x['hedge_premium'], reverse=False)
             sorted_hedges['Success'] = options[:top]
             sorted_hedges['Status'] = 200
