@@ -123,6 +123,10 @@ class BManagerGUI(tk.Tk):
                 cl = tk.Label(frame,text=contract)
                 cl.grid(row=row,column=0,sticky=tk.W)
 
+                d = datetime.datetime.strptime(i['expiry_date'], '%d-%b-%Y')
+                d = datetime.date.strftime(d, "%Y-%m-%d")
+                i['expiry_date'] = d
+
                 pl = tk.Label(frame,text=i['action'])
                 pl.grid(row=row,column=1,sticky=tk.NSEW)
 
