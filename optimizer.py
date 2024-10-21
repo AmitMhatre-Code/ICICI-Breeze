@@ -136,7 +136,13 @@ class optimizer():
             sorted_options['Status'] = options_chain['Status']
 
         return sorted_options   
-    
+
+    def get_quote(stock_code,exchange_code,expiry_date,product_type,right,strike_price):
+        breeze = optimizer.get_session()
+        # quote = breeze.get_quotes(stock_code,exchange_code,expiry_date,product_type,right,strike_price)
+        quote = breeze.get_option_chain_quotes(stock_code,exchange_code,expiry_date,product_type,right,strike_price)
+        return quote
+
     def place_order(order):
         breeze = optimizer.get_session()
         response = breeze.place_order(stock_code=order['stock_code'],

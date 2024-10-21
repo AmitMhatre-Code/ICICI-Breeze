@@ -497,8 +497,10 @@ class BManagerGUI(tk.Tk):
             for i in data['Success']:
                 premium = i['hedge_premium']
                 premium = f'₹{int(premium):,.0f}'
-                option = i['stock_code']+"-"+i['expiry_date']+"-"+str(i['strike_price'])+"-"+i['right']+" | Qty = "+str(i['hedge_qty'])+" | Premium = "+str(premium)+"        "
-                print(option)
+                option = i['stock_code']+"-"+i['expiry_date']+"-"+str(i['strike_price'])+"-"+i['right']+" | Qty = "+str(i['quantity'])+" | Premium = "+str(premium)+"        "                
+                d = datetime.datetime.strptime(i['expiry_date'], '%d-%b-%Y')
+                d = datetime.date.strftime(d, "%Y-%m-%d")
+                i['expiry_date'] = d 
                 button = tk.Radiobutton(frame,height=1,text=option,justify=tk.LEFT,variable=selected_option,value=i,command=partial(self.confirm_order,i,self.FRESH_ORDER))
                 button.grid(row=len(frame.grid_slaves()),sticky=tk.NW)
 
@@ -628,8 +630,21 @@ class BManagerGUI(tk.Tk):
         ow_pe = tk.Entry(self.order_frame,textvariable=self.ow_price)
         ow_pe.grid(row=8,column=2,sticky=tk.W)
 
-        tk.Button(self.order_frame,text='Exit',height=2,command=self.destroy_order_frame).grid(row=9,column=1,sticky=tk.E)
-        tk.Button(self.order_frame,text='Order',height=2,command=self.fire_order).grid(row=9,column=2,sticky=tk.W)
+        quote = optimizer.get_quote(stock_code,"NFO",expiry_date,"options",option,strike_price)
+        print(json.dumps(quote,indent=4))
+
+        if quote['Status'] == 200:
+            ltp = quote['Success'][0]['ltp']
+            best_offer = quote['Success'][0]['best_offer_price']
+            total_buy_qty = int(quote['Success'][0]['total_buy_qty'])
+            total_sell_qty = int(quote['Success'][0]['total_sell_qty'])
+            buy_sell_ratio = total_buy_qty / total_sell_qty
+            price_info = 'LTP : '+f'₹{ltp:,.2f}'+' | Best Offer : '+f'₹{best_offer:,.2f}'+' | Total Buy : '+f'{total_buy_qty:,.0f}'+' | Total Sell : '+f'{total_sell_qty:,.0f}'+' | Buy Sell Ratio : '+f'{buy_sell_ratio:,.1f}'
+            ow_pi = tk.Label(self.order_frame,text=price_info,anchor=tk.CENTER)
+            ow_pi.grid(row=9,columnspan=4,sticky=tk.NSEW)
+
+        tk.Button(self.order_frame,text='Exit',height=2,command=self.destroy_order_frame).grid(row=10,column=1,sticky=tk.E)
+        tk.Button(self.order_frame,text='Order',height=2,command=self.fire_order).grid(row=10,column=2,sticky=tk.W)
 
     def fire_order(self):
         order = {}

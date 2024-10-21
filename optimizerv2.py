@@ -182,7 +182,8 @@ class optimizer():
                     temp['right'] = i['right']
                     temp['action'] = "Buy"
                     temp['strike_price'] = int(i['strike_price'])
-                    temp['best_offer_price'] = i['best_offer_price']                    
+                    temp['best_offer_price'] = i['best_offer_price']
+                    temp['ltp'] = i['ltp']
                     temp['spot_distance'] = i['spot_distance']
                     temp['strike_distance'] = int(strike_price) - int(i['strike_price'])
                     options.append(copy.deepcopy(temp))
@@ -219,8 +220,8 @@ class optimizer():
                         # print("Picking up strike price : ", options[index-1]['strike_price'])
                         # print("Picking up premium ratio : ", options[index-1]['premium_ratio'])                        
                         hedge_qty = float(quantity) * options[index-1]['premium_ratio']
-                        i['hedge_qty'] = math.ceil(hedge_qty/lot_size) * lot_size
-                        i['hedge_premium'] = i['hedge_qty'] * i['best_offer_price']
+                        i['quantity'] = math.ceil(hedge_qty/lot_size) * lot_size
+                        i['hedge_premium'] = i['quantity'] * i['best_offer_price']
                         # print("Calculated hedge_qty : ",i['hedge_qty'])
                         # print("Calculated hedge_premium : ",i['hedge_premium'])
                         break
@@ -238,7 +239,13 @@ class optimizer():
             sorted_hedges['Status'] = options_chain['Status']
 
         return sorted_hedges   
-        
+
+    def get_quote(stock_code,exchange_code,expiry_date,product_type,right,strike_price):
+        breeze = optimizer.get_session()
+        # quote = breeze.get_quotes(stock_code,exchange_code,expiry_date,product_type,right,strike_price)
+        quote = breeze.get_option_chain_quotes(stock_code,exchange_code,expiry_date,product_type,right,strike_price)
+        return quote
+
     def place_order(order):
         breeze = optimizer.get_session()
         response = breeze.place_order(stock_code=order['stock_code'],

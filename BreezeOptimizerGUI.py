@@ -427,15 +427,27 @@ class BOGUI(tk.Tk):
         ow_ote = tk.Entry(self.order_frame,textvariable=self.ow_order_tranche)
         ow_ote.grid(row=7,column=2,sticky=tk.W)
 
-        price = order['best_bid_price']
-        self.ow_price = tk.StringVar(value=price)
+        self.ow_price = tk.StringVar(value=' ')
         ow_pl = tk.Label(self.order_frame,text='Price')
         ow_pl.grid(row=8,sticky=tk.E,columnspan=2)
         ow_pe = tk.Entry(self.order_frame,textvariable=self.ow_price)
         ow_pe.grid(row=8,column=2,sticky=tk.W)
 
-        tk.Button(self.order_frame,text='Exit',height=2,command=self.destroy_order_frame).grid(row=9,column=1,sticky=tk.E)
-        tk.Button(self.order_frame,text='Order',height=2,command=self.fire_order).grid(row=9,column=2,sticky=tk.W)
+        quote = optimizer.get_quote(stock_code,"NFO",expiry_date,"options",option,strike_price)
+        print(json.dumps(quote,indent=4))
+
+        if quote['Status'] == 200:
+            ltp = quote['Success'][0]['ltp']
+            best_offer = quote['Success'][0]['best_offer_price']
+            total_buy_qty = int(quote['Success'][0]['total_buy_qty'])
+            total_sell_qty = int(quote['Success'][0]['total_sell_qty'])
+            buy_sell_ratio = total_buy_qty / total_sell_qty
+            price_info = 'LTP : '+f'₹{ltp:,.2f}'+' | Best Offer : '+f'₹{best_offer:,.2f}'+' | Total Buy : '+f'{total_buy_qty:,.0f}'+' | Total Sell : '+f'{total_sell_qty:,.0f}'+' | Buy Sell Ratio : '+f'{buy_sell_ratio:,.1f}'
+            ow_pi = tk.Label(self.order_frame,text=price_info,anchor=tk.CENTER)
+            ow_pi.grid(row=9,columnspan=4,sticky=tk.NSEW)
+
+        tk.Button(self.order_frame,text='Exit',height=2,command=self.destroy_order_frame).grid(row=10,column=1,sticky=tk.E)
+        tk.Button(self.order_frame,text='Order',height=2,command=self.fire_order).grid(row=10,column=2,sticky=tk.W)
 
     def fire_order(self):
         order = {}
