@@ -174,7 +174,7 @@ class optimizer():
             # Find the premium of ATM option by weeding out ITM options and illiquid options
             options = [{}] #unable to use sort function unless this is a list of dicts!            
             for i in options_chain['Success']:
-                if int(i['total_sell_qty']) > 0 and int(i['strike_price']) <= int(strike_price) and int(i['strike_price']) > round(float(i['spot_price'])):
+                if int(i['total_sell_qty']) > 0 and ((right == "Call" and int(i['strike_price']) <= int(strike_price) and int(i['strike_price']) > round(float(i['spot_price']))) or (right == "Put" and int(i['strike_price']) >= int(strike_price) and int(i['strike_price']) < round(float(i['spot_price'])))):
                     i['spot_distance'] = int(i['strike_price']) - round(float(i['spot_price']))
                     temp = {}
                     temp['stock_code'] = i['stock_code']
