@@ -3,9 +3,9 @@
 # Open terminal and make this script executable with "chmod +x setup.sh", and run it by getting into a bash shell (type bash in terminal) and then executing it (type bash setup.sh in terminal)
 
 REPO_URL="https://github.com/AmitMhatre-Code/ICICI-Breeze"
-PROJ_DIRECTORY_PATH="/Users/amitmhatre/Documents/Bash-Test"
-CRED_DIRECTORY_PATH="/Users/amitmhatre/Documents/Bash-Test/BreezeCreds"
-VENV_PATH="/Users/amitmhatre/Documents/Bash-Test/test_venv"
+PROJ_DIRECTORY_PATH="/Users/amitmhatre/Documents/ICICI-Breeze"
+CRED_DIRECTORY_PATH="/Users/amitmhatre/Documents/BreezeCreds"
+VENV_PATH="/Users/amitmhatre/Documents/ICICI-Breeze/test_venv"
 BREEZE_PACKAGE="breeze-connect"
 TKINTER_PACKAGE="tk"
 

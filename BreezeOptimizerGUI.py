@@ -1,7 +1,7 @@
 import tkinter as tk
 import datetime
 import json
-from optimizer import optimizer
+from optimizerv2 import optimizer
 from functools import partial
 
 class BOGUI(tk.Tk):
